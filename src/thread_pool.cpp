@@ -33,7 +33,8 @@ thread_pool::thread_pool(size_t poolsize)
 
 void thread_pool::waitForWork()
 {
-    while(shutdown_==false)
+    // while(shutdown_==false)
+	for(;;)
     {
         std::function< void() > fn{};
         {
@@ -44,6 +45,10 @@ void thread_pool::waitForWork()
                 fn = std::move(workRequests_.front());
                 workRequests_.pop();
             }
+			else if (shutdown_)
+			{
+				break;
+			}
         }
         if( fn )
         {
