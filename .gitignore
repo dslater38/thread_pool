@@ -5,3 +5,15 @@ x64/*
 *.suo
 *.vcxproj.user
 *.o
+/prj/Win32/Debug
+/prj/x64/Debug
+/prj/thread_pool/Win32/Debug
+/prj/thread_pool/x64/Debug
+/prj/sample/x64/Debug
+/prj/thread_pool.VC.db
+/prj/thread_pool.VC.VC.opendb
+/vc140.pdb
+/thread_pool.obj
+/test.pdb
+/test.exe
+/main.obj

@@ -6,6 +6,7 @@ thread_pool::~thread_pool()
         std::unique_lock<std::mutex> lk{mtx_};
         shutdown_ = true;
     }
+	std::cerr << "notify_all" << std::endl;
     trigger_.notify_all();
     for( auto &tr : pool_ )
     {
@@ -37,7 +38,7 @@ void thread_pool::waitForWork()
         std::function< void() > fn{};
         {
             std::unique_lock<std::mutex> lk{mtx_};
-            trigger_.wait( lk, [this]{ return !waitPred(); } );
+            trigger_.wait( lk, [this]{ return waitPred(); } );
             if( !workRequests_.empty() )
             {
                 fn = std::move(workRequests_.front());
@@ -58,4 +59,8 @@ void thread_pool::enqueueWork( const std::function< void() > &fn )
         workRequests_.emplace( fn );
     }
     trigger_.notify_one();
+}
+
+void thread_pool::waitForAllWorkers()
+{
 }

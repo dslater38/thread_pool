@@ -8,6 +8,7 @@
 #include <mutex>
 #include <queue>
 #include <functional>
+#include <iostream>
 
 class thread_pool
 {
@@ -15,9 +16,11 @@ public:
     ~thread_pool();
     thread_pool(size_t poolsize=0);
     void enqueueWork(const  std::function< void() > &fn );
+    void waitForAllWorkers();
 private:
     void waitForWork();
     bool waitPred()const {
+		// std::cerr << std::this_thread::get_id() << " notified" << std::endl;
         return (!workRequests_.empty() || shutdown_);
     }
 private:
