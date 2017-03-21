@@ -10,6 +10,8 @@
 #include <iostream>
 #include <future>
 
+#define NO_PARAM_PACKS_IN_LAMBDA 1
+
 class thread_pool
 {
 public:
@@ -26,11 +28,31 @@ public:
 	thread_pool &operator=(const thread_pool &) = delete;
 	thread_pool &operator=(thread_pool &&) = delete;
     void enqueueWork(std::function< void(thread_pool &pool) > fn );
-	template <class... Targs>
-	void enqueueWork(std::function< void(thread_pool &, Targs...) > fn, Targs&&...args);
 	void enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set)>> tasks, std::function< void(thread_pool &pool) > fn);
+#if NO_PARAM_PACKS_IN_LAMBDA
+// If your compiler can't expand parameter packs inside a lambda.
+// only support max of 3 args.
+	template <class Targ1>
+	void enqueueWork(std::function< void(thread_pool &, Targ1) > fn, Targ1 arg1);
+	template <class Targ1>
+	void enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set, Targ1)>> tasks, std::function< void(thread_pool &pool) > fn, Targ1 arg1);
+
+	template <class Targ1, class Targ2>
+	void enqueueWork(std::function< void(thread_pool &, Targ1, Targ2) > fn, Targ1 arg1, Targ2 arg2);
+	template <class Targ1, class Targ2>
+	void enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set, Targ1, Targ2)>> tasks, std::function< void(thread_pool &pool) > fn, Targ1 arg1, Targ2 arg2);
+
+	template <class Targ1, class Targ2, class Targ3>
+	void enqueueWork(std::function< void(thread_pool &, Targ1, Targ2, Targ3) > fn, Targ1 arg1, Targ2 arg2, Targ3 arg3);
+	template <class Targ1, class Targ2, class Targ3>
+	void enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set, Targ1, Targ2, Targ3)>> tasks, std::function< void(thread_pool &pool) > fn, Targ1 arg1, Targ2 arg2, Targ3 arg3);
+
+#else
+	template <class... Targs>
+	void enqueueWork(std::function< void(thread_pool &, Targs&&...) > fn, Targs&&...args);
 	template <class... Targs>
 	void enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set, Targs&&...args)>> tasks, std::function< void(thread_pool &pool) > fn, Targs&&...args);
+#endif
     void waitForAllWorkers();
 	void initiateShutdown();
 private:
@@ -79,6 +101,91 @@ namespace details {
 	}
 }
 
+
+
+#if NO_PARAM_PACKS_IN_LAMBDA
+// If your compiler can't expand parameter packs inside a lambda.
+// only support max of 3 args.
+template <class Targ1>
+void thread_pool::enqueueWork(std::function< void(thread_pool &, Targ1) > fn, Targ1 arg1)
+{
+	auto task_rref = details::make_rref(fn);
+	enqueueWork([=](thread_pool &p) {
+		auto ff = const_cast< details::rref_impl<decltype(fn)> &>(task_rref).move();
+		ff(p, std::forward<Targ1>(arg1));
+	});
+}
+template <class Targ1>
+void thread_pool::enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set, Targ1)>> tasks, std::function< void(thread_pool &pool) > fn, Targ1 arg1)
+{
+	auto task_rref = details::make_rref(fn);
+	enqueueWork([=](thread_pool &p, , std::shared_ptr<IWorkSet> set) {
+		auto ff = const_cast< details::rref_impl<tasks::value_type> &>(task_rref).move();
+		ff(p, std::move(set), std::forward<Targ1>(arg1));
+	});
+}
+
+template <class Targ1, class Targ2>
+void thread_pool::enqueueWork(std::function< void(thread_pool &, Targ1, Targ2) > fn, Targ1 arg1, Targ2 arg2)
+{
+	auto task_rref = details::make_rref(fn);
+	enqueueWork([=](thread_pool &p) {
+		auto ff = const_cast< details::rref_impl<decltype(fn)> &>(task_rref).move();
+		ff(p, std::forward<Targ1>(arg1), std::forward<Targ1>(arg2));
+	});
+}
+template <class Targ1, class Targ2>
+void thread_pool::enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set, Targ1, Targ2)>> tasks, std::function< void(thread_pool &pool) > fn, Targ1 arg1, Targ2 arg2)
+{
+	auto task_rref = details::make_rref(fn);
+	enqueueWork([=](thread_pool &p, , std::shared_ptr<IWorkSet> set) {
+		auto ff = const_cast< details::rref_impl<tasks::value_type> &>(task_rref).move();
+		ff(p, std::move(set), std::forward<Targ1>(arg1), std::forward<Targ1>(arg2));
+	});
+}
+
+template <class Targ1, class Targ2, class Targ3>
+void thread_pool::enqueueWork(std::function< void(thread_pool &, Targ1, Targ2, Targ3) > fn, Targ1 arg1, Targ2 arg2, Targ3 arg3)
+{
+	auto task_rref = details::make_rref(fn);
+	enqueueWork([=](thread_pool &p) {
+		auto ff = const_cast< details::rref_impl<decltype(fn)> &>(task_rref).move();
+		ff(p, std::forward<Targ1>(arg1), std::forward<Targ1>(arg2), std::forward<Targ1>(arg3));
+	});
+}
+template <class Targ1, class Targ2, class Targ3>
+void thread_pool::enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set, Targ1, Targ2, Targ3)>> tasks, std::function< void(thread_pool &pool) > fn, Targ1 arg1, Targ2 arg2, Targ3 arg3)
+{
+	auto task_rref = details::make_rref(fn);
+	enqueueWork([=](thread_pool &p, , std::shared_ptr<IWorkSet> set) {
+		auto ff = const_cast< details::rref_impl<tasks::value_type> &>(task_rref).move();
+		ff(p, std::move(set), std::forward<Targ1>(arg1), std::forward<Targ1>(arg2), std::forward<Targ1>(arg3));
+	});
+}
+
+#else
+template <class... Targs>
+void thread_pool::enqueueWork(std::function< void(thread_pool &, Targs&&...) > fn, Targs&&... args)
+{
+	auto task_rref = details::make_rref(fn);
+	enqueueWork([=](thread_pool &p) {
+		auto ff = const_cast< details::rref_impl<decltype(fn)> &>(task_rref).move();
+		ff(p, std::forward<Targs&&>(args)...);
+	});
+}
+template <class... Targs>
+void thread_pool::enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set, Targs&&...)>> tasks, std::function< void(thread_pool &pool) > fn, Targs&&... args)
+{
+	auto task_rref = details::make_rref(fn);
+	enqueueWork([=](thread_pool &p, , std::shared_ptr<IWorkSet> set) {
+		auto ff = const_cast< details::rref_impl<tasks::value_type> &>(task_rref).move();
+		ff(p, std::move(set), std::forward<Targs&&>(args)...);
+	});
+}
+
+#endif
+
+#if 0
 template <typename... Targs>
 class Fcn
 {
@@ -132,10 +239,10 @@ private:
     std::tuple<Targs...> args_{};
 };
 
-template< typename...Targs>
-Fcn<Targs> makeFcn( std::function<void(thread_pool &, std::shared_ptr<thread_pool::IWorkSet>, Targs...)>  fcn, Targs&&... args )
+template< typename... Targs>
+Fcn<Targs...> makeFcn( std::function<void(thread_pool &, std::shared_ptr<thread_pool::IWorkSet>, Targs...)>  fcn, Targs&&... args )
 {
-    return Fcn<Targs>{std::move(fcn), std::forward<Targs>(args)...};
+    return Fcn<Targs...>{std::move(fcn), std::forward<Targs>(args)...};
 }
 
 template <typename... Targs>
@@ -168,5 +275,6 @@ void thread_pool::enqueueWork(std::vector< std::function< void(thread_pool &, st
 	}
 	enqueueWork(fcns, std::move(fn));
 }
+#endif // 0
 
 #endif //THREAD_POOL_H__

@@ -327,7 +327,7 @@ getListeners(const char *port)
 			}
 			else
 			{
-				close(listenFd);
+				native::closesocket(listenFd);
 			}
 		}
 		freeaddrinfo(result);

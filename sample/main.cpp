@@ -69,22 +69,22 @@ int main(int, char **)
 
     return 0;
 }
-
-int runFib(int n)
-{
-	int result = 0;
-
-	std::function<void(thread_pool &, std::shared_ptr<thread_pool::IWorkSet> )> fib = [=,&result](thread_pool &pool, std::shared_ptr<thread_pool::IWorkSet> set) {
-		if (n == 0 || n == 1)
-		{
-			result += n;
-			set->finishSubTask();
-		}
-		else
-		{
-			auto vec = std::vector< std::function< void(thread_pool &, std::shared_ptr<thread_pool::IWorkSet> set, int n)>>{};
-			vec[0] = [=]()
-			
-		}
-	};
-}
+//
+//int runFib(int n)
+//{
+//	int result = 0;
+//
+//	std::function<void(thread_pool &, std::shared_ptr<thread_pool::IWorkSet> )> fib = [=,&result](thread_pool &pool, std::shared_ptr<thread_pool::IWorkSet> set) {
+//		if (n == 0 || n == 1)
+//		{
+//			result += n;
+//			set->finishSubTask();
+//		}
+//		else
+//		{
+//			auto vec = std::vector< std::function< void(thread_pool &, std::shared_ptr<thread_pool::IWorkSet> set, int n)>>{};
+//			vec[0] = [=]()
+//			
+//		}
+//	};
+//}
