@@ -133,9 +133,9 @@ private:
 };
 
 template< typename...Targs>
-Fcn<Targs> makeFcn( std::function<void(thread_pool &, std::shared_ptr<thread_pool::IWorkSet>, Targs...)>  fcn, Targs&&... args )
+Fcn<Targs...> makeFcn( std::function<void(thread_pool &, std::shared_ptr<thread_pool::IWorkSet>, Targs...)>  fcn, Targs&&... args )
 {
-    return Fcn<Targs>{std::move(fcn), std::forward<Targs>(args)...};
+    return Fcn<Targs...>{std::move(fcn), std::forward<Targs>(args)...};
 }
 
 template <typename... Targs>
@@ -151,18 +151,18 @@ void thread_pool::enqueueWork(std::function< void(thread_pool &, Targs...) > fn,
 	});
 }
 
-template <class... Targs>
+template <typename... Targs>
 void thread_pool::enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set, Targs&&...args)>> tasks, std::function< void(thread_pool &pool) > fn, Targs&&...args)
 {
-	std::vector < std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set)> fcns{};
+	std::vector < std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set)>> fcns{};
 	fcns.reserve(tasks.size());
 	for (auto & task : tasks)
 	{        
-        Fcn F{std::move(task), args};
+        auto F = makeFcn(std::move(task), std::forward<Targs>(args)...);
         auto task_rref = details::make_rref(F);
         
 		fcns.emplace_back([=](thread_pool &p, std::shared_ptr<IWorkSet> set) {
-			auto ff{ const_cast< details::rref_impl<std::function< void(thread_pool &, std::shared_ptr<IWorkSet>)>> &>(task_rref).move() };
+			auto ff = const_cast< details::rref_impl<std::function< void(thread_pool &, std::shared_ptr<IWorkSet>)>> &>(task_rref).move();
 			ff(p, set);
 		});
 	}
