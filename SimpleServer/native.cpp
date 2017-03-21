@@ -1,6 +1,6 @@
-#ifdef WIN32
+#include "native.h"
 
-#include <Winsock2.h>
+#ifdef WIN32
 #include <iostream>
 
 // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
@@ -27,10 +27,19 @@ namespace native {
         WSACleanup();
     }
     
+    int closesocket(Socket s)
+    {
+        return ::closesocket(s);
+    }
+    
 }
 #else
 namespace native {
     
+    int closesocket(Socket s)
+    {
+        return ::close(s);
+    }
     
     void init()
     {

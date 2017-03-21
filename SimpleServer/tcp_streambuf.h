@@ -6,29 +6,7 @@
 #include <memory>
 #include <array>
 #include <iostream>
-
-#ifdef WIN32
-#include <Winsock2.h>
-#include <ws2tcpip.h>
-inline
-int close(SOCKET s)
-{
-    return closesocket(s);
-}
-#else
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <unistd.h>
-#endif
-
-
-namespace native
-{
-    using Socket=decltype(::socket(AF_INET, SOCK_STREAM, 0));
-    void init();
-    void shutdown();
-}
+#include "native.h"
 
 #ifndef INVALID_SOCKET
 #define INVALID_SOCKET (static_cast<native::Socket>(-1))

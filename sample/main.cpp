@@ -82,8 +82,8 @@ int runFib(int n)
 		}
 		else
 		{
-			auto vec = std::vector< std::function< void(thread_pool &, std::shared_ptr<thread_pool::IWorkSet> set)>>{};
-			n = n - 1;
+			auto vec = std::vector< std::function< void(thread_pool &, std::shared_ptr<thread_pool::IWorkSet> set, int n)>>{};
+			vec[0] = [=]()
 			
 		}
 	};

@@ -5,6 +5,7 @@ x64/*
 *.suo
 *.vcxproj.user
 *.o
+*.exe
 /prj/Win32/*
 /prj/x64/*
 /prj/*/Win32/*

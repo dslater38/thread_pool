@@ -3,19 +3,9 @@
    
 #include "tcp_streambuf.h"
 #include "thread_pool.h" 
+#include "native.h"
 
-#ifdef WIN32
-#include <Winsock2.h>
-#include <ws2tcpip.h>
-#else
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h> 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#endif
+
 
 #include <thread>
 #include <string>
@@ -474,6 +464,6 @@ tpipe()
 
 	p[PRECV] = accept(listernerFd, 0, 0);
 
-	closesocket(listernerFd);
+	native::closesocket(listernerFd);
 	return p;
 }

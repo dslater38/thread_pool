@@ -1,4 +1,5 @@
 #include "thread_pool.h"
+#include <atomic>
 
 thread_pool::~thread_pool()
 {
@@ -68,34 +69,6 @@ void thread_pool::enqueueWork( std::function< void(thread_pool &pool) > fn )
 }
 
 
-template <typename T>
-struct rref_impl
-{
-	rref_impl() = delete;
-	rref_impl(T && x) : x{ std::move(x) } {}
-	rref_impl(const rref_impl & other)
-		: x{ std::move(const_cast<rref_impl &>(other).x) }, isCopied{ true }
-	{
-		//assert(other.isCopied == false);
-	}
-	rref_impl(rref_impl && other)
-		: x{ std::move(other.x) }, isCopied{ std::move(other.isCopied) }
-	{
-	}
-	rref_impl & operator=(rref_impl other) = delete;
-	T && move()
-	{
-		return std::move(x);
-	}
-private:
-	T x;
-	bool isCopied = false;
-};
-
-template<typename T> rref_impl<T> make_rref(T && x)
-{
-	return rref_impl<T>{ std::move(x) };
-}
 
 class WorkSet : public thread_pool::IWorkSet
 {
@@ -115,7 +88,7 @@ public:
 		}
 	}
 private:
-	std::atomic_uint32_t	counter_;
+	std::atomic<uint32_t>	counter_;
 	std::function< void(thread_pool &pool) > fn_;
 	thread_pool		&pool_;
 };
@@ -127,9 +100,9 @@ thread_pool::enqueueWork(std::vector< std::function< void(thread_pool &, std::sh
 	auto wSet = std::static_pointer_cast<IWorkSet>(std::make_shared<WorkSet>(numTasks, std::move(fn), *this));
 	for (auto &f : tasks)
 	{
-		auto ff_rref = make_rref(std::move(f));
+		auto ff_rref = details::make_rref(std::move(f));
 		enqueueWork([=](thread_pool &p) {
-			auto ff{ const_cast< rref_impl<std::function< void(thread_pool &, std::shared_ptr<IWorkSet>)>> &>(ff_rref).move() };
+			auto ff{ const_cast< details::rref_impl<std::function< void(thread_pool &, std::shared_ptr<IWorkSet>)>> &>(ff_rref).move() };
 			ff(p,wSet);
 		});
 	}
