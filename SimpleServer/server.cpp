@@ -445,7 +445,7 @@ tpipe()
  	struct sockaddr_in loopback;
 	std::memset(&loopback, '\0', sizeof(loopback));
 	struct sockaddr *serverptr = (struct sockaddr*)&loopback;
-	int loopback_size = (int)sizeof(loopback);
+	socklen_t loopback_size = (socklen_t)sizeof(loopback);
 
 	loopback.sin_family = AF_INET;
 	loopback.sin_addr.s_addr = htonl(INADDR_LOOPBACK);

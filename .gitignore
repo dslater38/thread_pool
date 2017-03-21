@@ -6,6 +6,7 @@ x64/*
 *.vcxproj.user
 *.o
 *.exe
+server
 /prj/Win32/*
 /prj/x64/*
 /prj/*/Win32/*
