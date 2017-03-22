@@ -76,7 +76,7 @@ public:
 	WorkSet(uint32_t numTasks, std::function< void(thread_pool &pool) > fn, thread_pool &p)
 		: counter_{ numTasks }
 		, fn_{ std::move(fn) }
-		, pool_{ p }
+		, pool_( p )
 	{
 
 	}
@@ -98,12 +98,13 @@ thread_pool::enqueueWork(std::vector< std::function< void(thread_pool &, std::sh
 {
 	auto numTasks = (uint32_t)(tasks.size());
 	auto wSet = std::static_pointer_cast<IWorkSet>(std::make_shared<WorkSet>(numTasks, std::move(fn), *this));
-	for (auto &f : tasks)
+	for (auto f : tasks)
 	{
-		auto ff_rref = details::make_rref(std::move(f));
+		//auto ff_rref = details::make_rref(std::move(f));
 		enqueueWork([=](thread_pool &p) {
-			auto ff{ const_cast< details::rref_impl<std::function< void(thread_pool &, std::shared_ptr<IWorkSet>)>> &>(ff_rref).move() };
-			ff(p,wSet);
+            f(p,wSet);
+//			auto ff{ const_cast< details::rref_impl<std::function< void(thread_pool &, std::shared_ptr<IWorkSet>)>> &>(ff_rref).move() };
+//			ff(p,wSet);
 		});
 	}
 }

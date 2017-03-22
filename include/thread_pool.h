@@ -26,11 +26,11 @@ public:
 	thread_pool &operator=(const thread_pool &) = delete;
 	thread_pool &operator=(thread_pool &&) = delete;
     void enqueueWork(std::function< void(thread_pool &pool) > fn );
-	template <class... Targs>
-	void enqueueWork(std::function< void(thread_pool &pool, Targs&&...args) > fn, Targs&&...args);
+	//~ template <class... Targs>
+	//~ void enqueueWork(std::function< void(thread_pool &pool, Targs&&...args) > fn, Targs&&...args);
 	void enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set)>> tasks, std::function< void(thread_pool &pool) > fn);
-	template <class... Targs>
-	void enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set, Targs&&...args)>> tasks, std::function< void(thread_pool &pool) > fn, Targs&&...args);
+	//~ template <class... Targs>
+	//~ void enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set, Targs&&...args)>> tasks, std::function< void(thread_pool &pool) > fn, Targs&&...args);
     void waitForAllWorkers();
 	void initiateShutdown();
 private:
@@ -79,28 +79,28 @@ namespace details {
 	}
 }
 
-template <class... Targs>
-void thread_pool::enqueueWork(std::function< void(thread_pool &pool, Targs&&...args) > fn, Targs&&...args)
-{
-	enqueueWork([=](thread_pool &pool) {
-		fn(std::forward<Targs>(args)...);
-	});
-}
+//~ template <class... Targs>
+//~ void thread_pool::enqueueWork(std::function< void(thread_pool &pool, Targs&&...args) > fn, Targs&&...args)
+//~ {
+	//~ enqueueWork([=](thread_pool &pool) {
+		//~ fn(std::forward<Targs>(args)...);
+	//~ });
+//~ }
 
-template <class... Targs>
-void thread_pool::enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set, Targs&&...args)>> tasks, std::function< void(thread_pool &pool) > fn, Targs&&...args)
-{
-	std::vector < std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set)> fcns{};
-	fcns.reserve(tasks.size());
-	for (auto & task : tasks)
-	{
-		auto task_rref = details::make_rref(std::move(task));
-		fcns.emplace_back([=](thread_pool &p, std::shared_ptr<IWorkSet> set) {
-			auto ff{ const_cast< details::rref_impl<std::function< void(thread_pool &, std::shared_ptr<IWorkSet>, Targs&&...args)>> &>(task_rref).move() };
-			ff(p, set, std::forward<Targs>(args)...);
-		});
-	}
-	enqueueWork(fcns, std::move(fn));
-}
+//~ template <class... Targs>
+//~ void thread_pool::enqueueWork(std::vector< std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set, Targs&&...args)>> tasks, std::function< void(thread_pool &pool) > fn, Targs&&...args)
+//~ {
+	//~ std::vector < std::function< void(thread_pool &, std::shared_ptr<IWorkSet> set)> fcns{};
+	//~ fcns.reserve(tasks.size());
+	//~ for (auto & task : tasks)
+	//~ {
+		//~ auto task_rref = details::make_rref(std::move(task));
+		//~ fcns.emplace_back([=](thread_pool &p, std::shared_ptr<IWorkSet> set) {
+			//~ auto ff{ const_cast< details::rref_impl<std::function< void(thread_pool &, std::shared_ptr<IWorkSet>, Targs&&...args)>> &>(task_rref).move() };
+			//~ ff(p, set, std::forward<Targs>(args)...);
+		//~ });
+	//~ }
+	//~ enqueueWork(fcns, std::move(fn));
+//~ }
 
 #endif //THREAD_POOL_H__
